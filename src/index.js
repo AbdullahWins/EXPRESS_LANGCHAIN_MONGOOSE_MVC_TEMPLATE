@@ -38,24 +38,24 @@ admin.initializeApp({
   }),
 });
 
-//import database connection
+//import database connection and routes
 const routes = require("./routes/main/routes.js");
-const connectDatabase = require("../config/database/database.js");
+const connectToDatabase = require("../config/databases/mongoose.config.js");
 app.use(routes);
 
 //starting the server
 async function start() {
   try {
     // Connect to MongoDB using Mongoose
-    await connectDatabase();
+    await connectToDatabase();
 
     app.get("/", (req, res) => {
-      res.send("welcome to the server");
       console.log("welcome to the server");
+      res.send("welcome to the server!");
     });
 
     app.listen(port, () => {
-      console.log(`Server started on port ${port}`);
+      console.log(`Server is running on port: ${port}`);
     });
   } catch (err) {
     console.error(err);

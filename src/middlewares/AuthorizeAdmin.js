@@ -23,7 +23,7 @@ const authorizeAdmin = async (req, res, next) => {
         .json({ message: "No valid admin exists with the given token!" });
     }
     console.log(adminDoc?.email, "is accessing the API!");
-    req.admin = adminDoc;
+    req.admin = { ...adminDoc, role: "admin" };
     next();
   });
 };

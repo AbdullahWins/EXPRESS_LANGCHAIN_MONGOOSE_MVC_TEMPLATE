@@ -23,7 +23,7 @@ const authorizeUser = async (req, res, next) => {
         .json({ message: "No valid user exists with the given token!" });
     }
     console.log(userDoc?.email, "is accessing the API!");
-    req.user = userDoc;
+    req.user = { ...userDoc, role: "user" };
     next();
   });
 };

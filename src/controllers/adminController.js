@@ -2,9 +2,9 @@
 
 const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
-const { SendEmail } = require("../services/email/SendEmail");
-const { uploadMultipleFiles } = require("../utilities/fileUploader");
-const { InitiateToken } = require("../services/token/InitiateToken");
+const { SendEmail } = require("../services/emails/SendEmail");
+const { uploadMultipleFiles } = require("../services/uploaders/fileUploader");
+const { InitiateToken } = require("../services/tokens/InitiateToken");
 const Admin = require("../models/AdminModel");
 
 //login using mongoose
@@ -57,6 +57,7 @@ const RegisterAdmin = async (req, res) => {
 
     // Save the admin to the database
     await newAdmin.save();
+    console.log(newAdmin);
 
     return res
       .status(201)

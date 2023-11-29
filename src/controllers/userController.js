@@ -2,9 +2,9 @@
 
 const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
-const { SendEmail } = require("../services/email/SendEmail");
-const { uploadMultipleFiles } = require("../utilities/fileUploader");
-const { InitiateToken } = require("../services/token/InitiateToken");
+const { SendEmail } = require("../services/emails/SendEmail");
+const { uploadMultipleFiles } = require("../services/uploaders/fileUploader");
+const { InitiateToken } = require("../services/tokens/InitiateToken");
 const User = require("../models/UserModel");
 
 //login using mongoose

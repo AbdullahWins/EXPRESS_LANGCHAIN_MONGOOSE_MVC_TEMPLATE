@@ -3,6 +3,7 @@
 const { ObjectId } = require("mongodb");
 const { Timekoto } = require("timekoto");
 const Chat = require("../models/ChatModel");
+const AccessValidator = require("../services/validators/AccessValidator");
 
 //get all chat using mongoose
 const getAllChats = async (req, res) => {
@@ -17,12 +18,12 @@ const getAllChats = async (req, res) => {
       console.log("User is accessing the API!");
     }
     //perform query on database
-    const histories = await Chat.find();
-    if (histories?.length === 0) {
+    const chats = await Chat.find();
+    if (chats?.length === 0) {
       return res.send([]);
     }
-    console.log(`Found ${histories.length} histories`);
-    return res.send(histories);
+    console.log(`Found ${chats.length} chats`);
+    return res.send(chats);
   } catch (err) {
     console.error(err);
     return res.status(500).send({ message: "Server Error" });
@@ -44,17 +45,18 @@ const getOneChat = async (req, res) => {
       _id: chatId,
     });
 
+    if (!chat) {
+      return res.status(404).send({ message: "Chat not found" });
+    }
+
     //validate user authority from middleware
     const user = req.user;
-    if (user?.role !== "admin") {
-      if (user?._doc?._id.toString() !== chat?.userId) {
-        console.log(user?._doc?._id, chat?.userId);
-        return res.status(401).send({
-          message: "This user does not have access to perform this operation!",
-        });
-      } else {
-        console.log("User is accessing the API!");
-      }
+    const userId = chat?.userId;
+    const hasAccess = AccessValidator(user, userId);
+    if (!hasAccess) {
+      return res.status(401).send({
+        message: "This user does not have access to perform this operation!",
+      });
     }
 
     if (!chat) {
@@ -81,22 +83,12 @@ const getChatsByUser = async (req, res) => {
 
     //validate user authority from middleware
     const user = req.user;
-    if (user?.role !== "admin") {
-      if (user?._doc?._id.toString() !== userId) {
-        console.log(user?._doc?._id.toString(), userId);
-        return res.status(401).send({
-          message: "This user does not have access to perform this operation!",
-        });
-      } else {
-        console.log("Chat is accessing the API!");
-      }
+    const hasAccess = AccessValidator(user, userId);
+    if (!hasAccess) {
+      return res.status(401).send({
+        message: "This user does not have access to perform this operation!",
+      });
     }
-
-    //to perform multiple filters at once
-    // const filter = [{ userId: userId }];
-    // const response = chatHistoriesCollection.find({
-    //   filter,
-    // });
 
     //to perform single filter
     const filter = { userId: userId };
@@ -129,15 +121,11 @@ const getLastChatsByUser = async (req, res) => {
 
     //validate user authority from middleware
     const user = req.user;
-    if (user?.role !== "admin") {
-      if (user?._doc?._id.toString() !== userId) {
-        console.log(user?._doc?._id.toString(), userId);
-        return res.status(401).send({
-          message: "This user does not have access to perform this operation!",
-        });
-      } else {
-        console.log("User is accessing the API!");
-      }
+    const hasAccess = AccessValidator(user, userId);
+    if (!hasAccess) {
+      return res.status(401).send({
+        message: "This user does not have access to perform this operation!",
+      });
     }
 
     //perform query on database
@@ -170,18 +158,15 @@ const addOneChat = async (req, res) => {
       sentBy,
       sentAt: Timekoto(),
     };
+
     //validate user authority from middleware
     const user = req.user;
-    console.log(user?._doc?._id);
-    if (user?.role !== "admin") {
-      if (user?._doc?._id.toString() !== userId) {
-        console.log(user?._id, userId);
-        return res.status(401).send({
-          message: "This user does not have access to perform this operation!",
-        });
-      } else {
-        console.log("User is accessing the API!");
-      }
+    const hasAccess = AccessValidator(user, userId);
+    console.log(hasAccess);
+    if (!hasAccess) {
+      return res.status(401).send({
+        message: "This user does not have access to perform this operation!",
+      });
     }
     //add new chat
     const result = await Chat.create(newChat);
@@ -190,7 +175,7 @@ const addOneChat = async (req, res) => {
       return res.status(500).send({ message: "Failed to add chat" });
     }
     console.log("Added a new chat", newChat);
-    return res.status(201).send(newChat);
+    return res.status(201).send({ ...newChat, _id: result._id });
   } catch (error) {
     console.error(`Error: ${error}`);
     return res
@@ -207,15 +192,11 @@ const deleteOneChatByChatId = async (req, res) => {
 
     //validate user authority from middleware
     const user = req.user;
-    if (user?.role !== "admin") {
-      if (user?._doc?._id.toString() !== userId) {
-        console.log(user?._doc?._id.toString(), userId);
-        return res.status(401).send({
-          message: "This user does not have access to perform this operation!",
-        });
-      } else {
-        console.log(`User ${user?._doc?.email} is accessing the API!`);
-      }
+    const hasAccess = AccessValidator(user, userId);
+    if (!hasAccess) {
+      return res.status(401).send({
+        message: "This user does not have access to perform this operation!",
+      });
     }
 
     //to perform multiple filters at once

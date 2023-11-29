@@ -1,5 +1,5 @@
 // file uploader
-const { firebaseStorage } = require("../../config/firebase/firebase.config");
+const { firebaseStorage } = require("../../../config/storages/firebase.config");
 const { UniqueNaam } = require("uniquenaam");
 
 //to upload single file (multer config set to single in index.js)
